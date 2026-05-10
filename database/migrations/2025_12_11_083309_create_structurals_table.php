@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('jabatan');
             $table->string('image');
             $table->string('caption');
-            $table->text('deskripsi')->nullable();
             $table->timestamps();
         });
     }
