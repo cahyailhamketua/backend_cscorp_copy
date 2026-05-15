@@ -17,7 +17,7 @@ Route::get('/clients', [ClientController::class, 'index']);
 // contacts API
 Route::get('/contacs', [ContactController::class, 'index']);
 
-Route::post('/send-message', [ContactController::class, 'sendMessage']);
+Route::post('/send-message', [ContactController::class, 'sendMessage'])->middleware('throttle:3,1');
 
 // locations API
 Route::get('/locations', [LocationController::class, 'index']);

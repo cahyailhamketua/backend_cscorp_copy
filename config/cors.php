@@ -30,7 +30,7 @@ return [
     'allowed_origins' => array_values(array_filter(
         array_map('trim', explode(',', env(
             'VISITOR_TRACKING_ALLOWED_CORS_ORIGINS',
-            'https://cscorp.co.id,https://www.cscorp.co.id'
+            'https://cscorp.co.id,https://www.cscorp.co.id,http://localhost:8081,http://127.0.0.1:8081'
         ))),
         static fn ($v) => $v !== ''
     )),

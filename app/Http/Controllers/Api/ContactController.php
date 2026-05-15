@@ -28,7 +28,9 @@ class ContactController extends Controller
     public function sendMessage(
         Request $request,
         \App\Services\GoogleSheetService $sheet,
-        \App\Services\ContactMailService $mail
+        \App\Services\ContactMailService $mail,
+        \App\Services\SpamDetectionService $spamDetection,
+        \App\Services\ToxicDetectionService $toxicDetection
     ) {
         // 1) Validasi input
         $validator = Validator::make($request->all(), [
@@ -43,6 +45,45 @@ class ContactController extends Controller
                 'success' => false,
                 'errors' => $validator->errors(),
             ], 422);
+        }
+
+        
+        // =========================
+        // DUPLICATE SPAM CHECK
+        // =========================
+        if ($spamDetection->isDuplicate(
+            $request->email,
+            $request->message
+        )) {
+
+            return response()->json([
+                'message' => 'Duplicate message detected'
+            ], 429);
+        }
+
+        // =========================
+        // TOXIC DETECTION
+        // =========================
+        try {
+            $result = $toxicDetection->check(
+                $request->message
+            );
+
+            if (isset($result['is_toxic']) && $result['is_toxic']) {
+
+                return response()->json([
+                    'message' => 'Pesan terdeteksi mengandung unsur toxic.'
+                ], 422);
+            }
+
+        } catch (\Exception $e) {
+
+            \Log::error('Toxic detection failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Layanan moderasi pesan sedang bermasalah.'
+            ], 500);
         }
 
         // 2) Siapkan data email
